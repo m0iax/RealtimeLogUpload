@@ -1,0 +1,4 @@
+
+*.cfg
+__pycache__/adifListener.cpython-38.pyc
+*.pyc
