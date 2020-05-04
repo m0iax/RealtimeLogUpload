@@ -6,7 +6,7 @@ import settings
 from tkinter import Frame
 
 WIDTH=270
-HEIGHT=100
+HEIGHT=50
 appName="ADIF Uploader for JS8Call"
 
 class UI(Tk):
@@ -23,7 +23,6 @@ class UI(Tk):
         if self.upLoader!=None:
             print('Shutting down ADIF Listener')
             self.upLoader.setListen(False)
-            self.upLoader.close()
             self.upLoader.join()
             
         print('Exiting. Thanks for using '+appName+' By M0IAX')
@@ -66,14 +65,6 @@ class UI(Tk):
         self.enableQSLButton=Button(frame,text='Enable eQSL Upload', bg="red", command=self.updateeQSL)
         self.enableQSLButton.grid(row=0, column=1, padx=5, pady=5)
         
-        
-  #      gps_page=Button(frame, text="GPS", command=lambda:controller.show_frame(GPSPage), bg="white")
-  #      gps_page.grid(row=2, column=0, sticky=W+E+N+S, padx=5, pady=5)
-
- #       aprs_page=Button(frame, text="APRS Message", command=lambda:controller.show_frame(MessagePage), bg="white")
- #       aprs_page.grid(row=2, column=1, sticky=W+E+N+S, padx=5, pady=5)
- #       settings_page=Button(frame, text="Settings", command=lambda:controller.show_frame(SettingsPage), bg="white")
- #       settings_page.grid(row=2, column=2, sticky=W+E+N+S, padx=5, pady=5)
     
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -87,11 +78,6 @@ class UI(Tk):
         
         self.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.title(appName+" by M0IAX")
-        
-        #container = Frame(self)
-        #container.pack(side="top", fill="both", expand=True)
-        #container.grid_rowconfigure(0, weight=1)
-        #container.grid_columnconfigure(0, weight=1)
         
         buttonFrame=Frame(self)
         buttonFrame.pack()

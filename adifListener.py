@@ -7,6 +7,9 @@ import json
 import time
 import configparser
 import os
+import sys
+import errno
+from time import sleep
 #import configAndSettings
 
 def createConfigFile(configFileName):
@@ -43,6 +46,9 @@ if os.path.isfile(configfilename):
 
     qrzAPIKey= config.get('QRZ.COM', 'apikey')
     
+    eqsluser= config.get('EQSL.CC', 'username')
+    eqslpassword= config.get('EQSL.CC', 'password')
+    
     qrz=int(config.get('SERVICES','qrz'))
     qrzEnabled=False
     if qrz==1:
@@ -53,7 +59,6 @@ if os.path.isfile(configfilename):
     if eqsl==1:
         eqslEnabled=True
     
-listen = (serverip, serverport)
 
 class UploadServer(threading.Thread):
     messageType='';
@@ -83,20 +88,27 @@ class UploadServer(threading.Thread):
     def __init__(self):
         t = threading.Thread.__init__(self)
         
+        self.listen = (serverip, serverport)
+
         self.listening = True
        
         self.qrzEnabled=qrzEnabled
         self.eqslEnabled=eqslEnabled
         
         self.qrzAPIKey = qrzAPIKey
+        self.eqslUser = eqsluser
+        self.eqslPassword = eqslpassword
+        
         self.first = False
         self.messageText=None
         self.messageType=None
         self.pttCount = 0
         
-        print('listening on', ':'.join(map(str, listen)))
+        print('listening on', ':'.join(map(str, self.listen)))
+
         self.sock = socket(AF_INET, SOCK_DGRAM)
-        self.sock.bind(listen)
+        self.sock.bind(self.listen)
+        self.sock.setblocking(False)
 
     def sendToQRZ(self, urlString):
       
@@ -114,8 +126,9 @@ class UploadServer(threading.Thread):
     def sendToEQSL(self, urlString):
           
         self._session = requests.Session()
-        self._session.verify = False
-        r = self._session.get(urlString)
+       # self._session.verify = False
+        r = self._session.get(urlString, verify=False)
+       # r = requests.get(urlString, verify=False)
         if r.status_code == 200:
             print(r)
             print(r.text)
@@ -126,8 +139,8 @@ class UploadServer(threading.Thread):
         
     def uploadToEQSL(self, adifEntry):
         print('Uploading to eQSL.cc')
-        url='https://www.eQSL.cc/qslcard/importADIF.cfm?ADIFData={0}'
-        url=url+'&EQSL_USER={1}&EQSL_PSWD={2}'
+        url='https://eQSL.cc/qslcard/importADIF.cfm?ADIFData={0}&EQSL_USER={1}&EQSL_PSWD={2}'
+        #url=url+'&EQSL_USER={1}&EQSL_PSWD={2}'
         url=url.format(adifEntry,self.eqslUser,self.eqslPassword)
         
         print('eqsl '+url)
@@ -135,7 +148,7 @@ class UploadServer(threading.Thread):
         
     def uploadToQRZ(self, logEntry):
         print('Uploading to QRZ.com')
-        url = ' http://logbook.qrz.com/api'
+        url = ' https://logbook.qrz.com/api'
         url = url+'?KEY={0}&'
         url = url+'ACTION=INSERT&ADIF={1}'
         url = url.format(self.qrzAPIKey, logEntry.decode())
@@ -144,15 +157,27 @@ class UploadServer(threading.Thread):
         self.sendToQRZ(url)
     def setListen(self, listen):
         self.listening=listen
-        if self.listening==False:
-            if self.sock!=None:
-                self.sock.close()
+        #if self.listening==False:
+        #    if self.sock!=None:
+        #        self.sock.close()
     def run(self):
         try:
             try:
                 while self.listening:
                     if self.sock!=None:
-                        content, addr = self.sock.recvfrom(65500)
+                        try:
+                            content, addr = self.sock.recvfrom(65500)
+                            #content, addr = self.sock.listen(5)
+                        except Exception as e:
+                            err = e.args[0]
+                            if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+                                sleep(1)
+                                #print('No data available')
+                                continue
+                            else:
+                                # a "real" error occurred
+                                print (e)
+                                sys.exit(1)
                     if content!=None and addr!=None:
                         print('Detected ADIF from JS8Call:', ':'.join(map(str, addr)))
                     
