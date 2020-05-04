@@ -6,7 +6,7 @@ import settings
 from tkinter import Frame
 
 WIDTH=270
-HEIGHT=50
+HEIGHT=100
 appName="ADIF Uploader for JS8Call"
 
 class UI(Tk):
