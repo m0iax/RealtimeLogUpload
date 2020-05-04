@@ -20,7 +20,7 @@ def createConfigFile(configFileName):
         config['NETWORK'] = {'serverip': '127.0.0.1',
                              'serverport': 2333
                             }
-        config['QRZ.COM'] = {'apikey': 'F1A5-5FF9-6A7F-56AE'
+        config['QRZ.COM'] = {'apikey': 'apikey'
                             }  
         config['EQSL.CC'] = {'username': 'username',
                              'password': 'password'
