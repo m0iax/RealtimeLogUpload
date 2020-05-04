@@ -1,9 +1,11 @@
 #! /usr/bin/python3
 
 from tkinter import *
-import adifListener
+#import adifListener
 import settings
 from tkinter import Frame
+import udpServer
+import UploadADIF
 
 WIDTH=270
 HEIGHT=100
@@ -17,13 +19,16 @@ class UI(Tk):
             print("Main Window is closing, call any function you'd like here!")
 
     def __enter__(self):
-            # make a database connection and return it
+      
         print('Starting')
     def ask_quit(self):
         if self.upLoader!=None:
             print('Shutting down ADIF Listener')
             self.upLoader.setListen(False)
             self.upLoader.join()
+        if self.udpserver!=None:
+            print('Shutting down UDP Server')
+            self.udpserver.close()
             
         print('Exiting. Thanks for using '+appName+' By M0IAX')
         
@@ -32,10 +37,18 @@ class UI(Tk):
         if self.upLoader!=None:
             enabled=self.upLoader.toggleEQSL()
             self.configureEQSLButton(enabled)
+        if self.uploadADIF!=None:
+            enabled=self.uploadADIF.toggleEQSL()
+            self.configureEQSLButton(enabled)
+            
     def updateQRZ(self):
         if self.upLoader!=None:
             enabled=self.upLoader.toggleQRZ()
             self.configureQRZButton(enabled)
+        if self.uploadADIF!=None:
+            enabled=self.uploadADIF.toggleQRZ()
+            self.configureQRZButton(enabled)
+            
     def configureQRZButton(self, enable):
         if enable:
             self.enableQRZButton.configure(bg="green")
@@ -72,9 +85,16 @@ class UI(Tk):
         self.settingValues = settings.Settings()
         self.loadSettings(self.settingValues)
         
-        self.upLoader = adifListener.UploadServer()
-        self.upLoader.daemon = True
-        self.upLoader.start()
+        self.upLoader=None
+        #self.upLoader = adifListener.UploadServer()
+        #self.upLoader.daemon = True
+        #self.upLoader.start()
+        
+        self.uploadADIF = UploadADIF.UploadServer()
+        
+        self.udpserver = udpServer.Server(self.uploadADIF)
+        self.udpserver.daemon = True
+        self.udpserver.start()
         
         self.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.title(appName+" by M0IAX")
@@ -84,8 +104,12 @@ class UI(Tk):
         
         self.show_buttons(buttonFrame, self)
         
-        self.configureEQSLButton(self.upLoader.getEQSLEnabled())
-        self.configureQRZButton(self.upLoader.getQRZEnabled())
+        if self.upLoader!=None:
+            self.configureEQSLButton(self.upLoader.getEQSLEnabled())
+            self.configureQRZButton(self.upLoader.getQRZEnabled())
+        if self.uploadADIF!=None:
+            self.configureEQSLButton(self.uploadADIF.getEQSLEnabled())
+            self.configureQRZButton(self.uploadADIF.getQRZEnabled())
         
 
 if __name__=="__main__":

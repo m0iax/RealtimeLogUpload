@@ -88,7 +88,7 @@ class UploadServer(threading.Thread):
     def __init__(self):
         t = threading.Thread.__init__(self)
         
-        self.listen = (serverip, serverport)
+        #self.listen = (serverip, serverport)
 
         self.listening = True
        
@@ -104,12 +104,20 @@ class UploadServer(threading.Thread):
         self.messageType=None
         self.pttCount = 0
         
-        print('listening on', ':'.join(map(str, self.listen)))
+        #print('listening on', ':'.join(map(str, self.listen)))
 
-        self.sock = socket(AF_INET, SOCK_DGRAM)
-        self.sock.bind(self.listen)
-        self.sock.setblocking(False)
-
+        #self.sock = socket(AF_INET, SOCK_DGRAM)
+        #self.sock.bind(self.listen)
+        #self.sock.setblocking(False)
+    
+    def processMessage(self,value):
+        if self.qrzEnabled:
+            self.uploadToQRZ(value)
+        if self.eqslEnabled:
+            self.uploadToEQSL(value)
+        if not self.qrzEnabled and not self.eqslEnabled:
+            print ('No ADIF upload enabled. ADIF not uploaded.')
+    
     def sendToQRZ(self, urlString):
       
         self._session = requests.Session()
@@ -151,7 +159,7 @@ class UploadServer(threading.Thread):
         url = ' https://logbook.qrz.com/api'
         url = url+'?KEY={0}&'
         url = url+'ACTION=INSERT&ADIF={1}'
-        url = url.format(self.qrzAPIKey, logEntry.decode())
+        url = url.format(self.qrzAPIKey, logEntry)
         
         print(url)
         self.sendToQRZ(url)
@@ -160,42 +168,42 @@ class UploadServer(threading.Thread):
         #if self.listening==False:
         #    if self.sock!=None:
         #        self.sock.close()
-    def run(self):
-        try:
-            try:
-                while self.listening:
-                    if self.sock!=None:
-                        try:
-                            content, addr = self.sock.recvfrom(65500)
-                            #content, addr = self.sock.listen(5)
-                        except Exception as e:
-                            err = e.args[0]
-                            if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-                                sleep(1)
-                                #print('No data available')
-                                continue
-                            else:
-                                # a "real" error occurred
-                                print (e)
-                                sys.exit(1)
-                    if content!=None and addr!=None:
-                        print('Detected ADIF from JS8Call:', ':'.join(map(str, addr)))
-                    
-                        if self.qrzEnabled:
-                            self.uploadToQRZ(content)
-                        if self.eqslEnabled:
-                            self.uploadToEQSL(content)
-                        if not self.qrzEnabled and not self.eqslEnabled:
-                            print ('No ADIF upload enabled. ADIF not uploaded.')
+#    def run(self):
+#        try:
+#            try:
+#                while self.listening:
+#                    if self.sock!=None:
+#                        try:
+#                            content, addr = self.sock.recvfrom(65500)
+#                            #content, addr = self.sock.listen(5)
+#                        except Exception as e:
+#                            err = e.args[0]
+#                            if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+#                                sleep(1)
+#                                #print('No data available')
+#                                continue
+#                            else:
+#                                # a "real" error occurred
+#                                print (e)
+#                                sys.exit(1)
+#                    if content!=None and addr!=None:
+#                        print('Detected ADIF from JS8Call:', ':'.join(map(str, addr)))
+#                    
+#                        if self.qrzEnabled:
+#                            self.uploadToQRZ(content)
+#                        if self.eqslEnabled:
+#                            self.uploadToEQSL(content)
+#                        if not self.qrzEnabled and not self.eqslEnabled:
+#                            print ('No ADIF upload enabled. ADIF not uploaded.')
                 
-            finally:
-                self.sock.close()
+#            finally:
+#                self.sock.close()
                 #self.join()
-        except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
-            print ("\nKilling Thread...")
-            self.listening = False
-            self.join() # wait for the thread to finish what it's doing
-            print ("Done.\nExiting.")
+#        except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
+#            print ("\nKilling Thread...")
+#            self.listening = False
+#            self.join() # wait for the thread to finish what it's doing
+#            print ("Done.\nExiting.")
             
     def close(self):
         self.listening = False
@@ -204,6 +212,6 @@ class UploadServer(threading.Thread):
 if __name__ == "__main__":
     
     server = UploadServer()
-    server.start()
+#    server.start()
     
 

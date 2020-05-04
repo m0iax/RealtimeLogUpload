@@ -9,6 +9,7 @@ import time
 import configparser
 import os
 import configAndSettings
+import UploadADIF
 
 def createConfigFile(configFileName):
     #cretes the config file if it does not exist
@@ -24,7 +25,7 @@ def createConfigFile(configFileName):
             configfile.close()
     
 
-configfilename="./js8call.gfg"
+configfilename="./js8call.cfg"
 createConfigFile(configfilename)
 
 if os.path.isfile(configfilename):
@@ -55,9 +56,16 @@ class Server(threading.Thread):
     messageText=''
     pttCount=0
     
-    def __init__(self):
+    def __init__(self, uploadadif):
         t = threading.Thread.__init__(self)
         
+        if uploadadif==None:
+            self.uploadADIF = UploadADIF.UploadServer()
+        else:
+            self.uploadADIF = uploadadif 
+               
+        self.showoutput = False
+        self.showLogOutput = True
         self.first = False
         self.messageText=None
         self.messageType=None
@@ -72,6 +80,7 @@ class Server(threading.Thread):
         value = message.get('value', '')
         params = message.get('params', {})
         
+            
         if self.messageType!=None:
             self.send(self.messageType, self.messageText)
             self.messageText=None
@@ -80,37 +89,28 @@ class Server(threading.Thread):
         if not typ:
             return
 
-        print('->', typ)
+        if typ == 'LOG.QSO':
+            value = value+' <eor>'
+            
+            if self.showLogOutput:
+                print('===========logging========= ')
+                print(value)
+                self.uploadADIF.processMessage(value)
+                print('=========================== ')
+            
+        if self.showoutput:
+            print('->', typ)
     
-        if value:
-            print('-> value', value)
+            if value:
+                print('-> value', value)
 
-        if params:
-            print('-> params: ', params)
+            if params:
+                print('-> params: ', params)
 
-#        if typ == 'PING':
-#            if self.first:
-#                self.send('STATION.GET_CALLSIGN')
-         #       self.first = False
-        
         if typ == 'RIG.PTT':
             if value == 'on':
                 self.pttCount = self.pttCount+1
                 print("PTT COUNT=====",self.pttCount)
-        #if typ == 'PING':
-             #self.send('STATION.GET_GRID')
-             #self.send('RIG.GET_FREQ')
-             #self.send('STATION.GET_CALLSIGN')
-             #self.send('RX.GET_CALL_ACTIVITY')
-
-        #### elif typ == 'STATION.GRID':
-        ####     if value != 'EM73TU49TQ':
-        ####         self.send('STATION.SET_GRID', 'EM73TU49TQ')
-
-        #### elif typ == 'RIG.FREQ':
-        ####     if params.get('DIAL', 0) != 14064000:
-        ####         self.send('RIG.SET_FREQ', '', {"DIAL": 14064000, "OFFSET": 977})
-        ####         self.send('TX.SEND_MESSAGE', 'HELLO WORLD')
 
         elif typ == 'CLOSE':
             self.close()
@@ -133,11 +133,14 @@ class Server(threading.Thread):
             while self.listening:
                 content, addr = self.sock.recvfrom(65500)
                 
-                print('incoming message:', ':'.join(map(str, addr)))
-                print(content)
+                #'print('incoming message:', ':'.join(map(str, addr)))
+                if self.showoutput:
+                    print(content)
                 
                 try:
                     message = json.loads(content)
+                    if self.showoutput:
+                        print('got message '+message)
                 except ValueError:
                     message = {}
 
@@ -156,7 +159,8 @@ class Server(threading.Thread):
 
 if __name__ == "__main__":
     #def main():
-    server = Server()
+    server = Server(None)
+    #server.uploadADIF.toggleEQSL()
     server.start()
     #s.listen()
 
