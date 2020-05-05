@@ -12,9 +12,9 @@
  <ul>
  <li>JS8Call</li>
  <li>python 3.7 or later</li>
- <li>an account on QRZ.com with a valid APIKEY*<li>
+ <li>an account on QRZ.com with a valid APIKEY*</li>
  <li>a User name and password for eQSL.cc*</li>
-<ul>
+</ul>
 
 *and account for either QRZ.com or eQSL.cc is required. you dont need both but it will work with both
 
