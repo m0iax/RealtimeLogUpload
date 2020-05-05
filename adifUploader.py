@@ -90,9 +90,6 @@ class UI(Tk):
         self.loadSettings(self.settingValues)
         
         self.upLoader=None
-        #self.upLoader = adifListener.UploadServer()
-        #self.upLoader.daemon = True
-        #self.upLoader.start()
         
         self.uploadADIF = UploadADIF.UploadServer()
         
@@ -126,9 +123,4 @@ if __name__=="__main__":
         
     finally:
         print('Finally Quit')
-    # if app.gpsl!=None:
-    #     app.gpsl.setReadGPS(False)
-    #     app.gpsl.join()
-    
-    
     
