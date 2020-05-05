@@ -105,6 +105,14 @@ class UI(Tk):
         
         self.show_buttons(buttonFrame, self)
         
+        labelFrame=Frame(self)
+        labelFrame.pack()
+        
+        aboutLabel = Label(labelFrame,text="M0IAX ADIF Uploader for JS8Call")
+        aboutLabel.grid(row=0,column=0, padx=5, pady=5)
+        #meLabel = Label(labelFrame,text="By M0IAX m0iax.com/findme")
+        #meLabel.grid(row=1,column=0, padx=5, pady=5)
+        
         if self.upLoader!=None:
             self.configureEQSLButton(self.upLoader.getEQSLEnabled())
             self.configureQRZButton(self.upLoader.getQRZEnabled())
