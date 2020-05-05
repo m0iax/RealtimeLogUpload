@@ -1,7 +1,11 @@
 #! /usr/bin/python3
 
+#Realtime ADIF uploaded for JS8Call
+#By Mark - M0IAX
+#http://m0iax.com/findme
+
+
 from tkinter import *
-#import adifListener
 import settings
 from tkinter import Frame
 import udpServer

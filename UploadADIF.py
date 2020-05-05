@@ -1,5 +1,9 @@
 #! /usr/bin/python3
 
+#Realtime ADIF uploaded for JS8Call
+#By Mark - M0IAX
+#http://m0iax.com/findme
+
 import threading
 from socket import socket, AF_INET, SOCK_DGRAM
 import requests
@@ -10,6 +14,8 @@ import os
 import sys
 import errno
 from time import sleep
+import urllib3
+
 #import configAndSettings
 
 def createConfigFile(configFileName):
@@ -17,13 +23,11 @@ def createConfigFile(configFileName):
     if not os.path.isfile(configFileName):
             
         config = configparser.ConfigParser()
-        config['NETWORK'] = {'serverip': '127.0.0.1',
-                             'serverport': 2333
-                            }
-        config['QRZ.COM'] = {'apikey': 'apikey'
+                            
+        config['QRZ.COM'] = {'apikey': 'APIKEY'
                             }  
-        config['EQSL.CC'] = {'username': 'username',
-                             'password': 'password'
+        config['EQSL.CC'] = {'username': 'USERNAME',
+                             'password': 'PASSWORD'
                             }  
         config['SERVICES'] = {'eqsl': 0,
                              'qrz': 0
@@ -33,7 +37,6 @@ def createConfigFile(configFileName):
             config.write(configfile)
             configfile.close()
     
-
 configfilename="./loguploader.cfg"
 createConfigFile(configfilename)
 
@@ -41,9 +44,7 @@ if os.path.isfile(configfilename):
     config = configparser.ConfigParser()
     config.read(configfilename)
 
-    serverip = config.get('NETWORK','serverip')
-    serverport = int(config.get('NETWORK', 'serverport'))
-
+   
     qrzAPIKey= config.get('QRZ.COM', 'apikey')
     
     eqsluser= config.get('EQSL.CC', 'username')
@@ -88,8 +89,10 @@ class UploadServer(threading.Thread):
     def __init__(self):
         t = threading.Thread.__init__(self)
         
+        #we can ignore the ssl warnings as the two domains we are uploading to are secure
+        urllib3.disable_warnings()
         #self.listen = (serverip, serverport)
-
+        self.showdebug=False
         self.listening = True
        
         self.qrzEnabled=qrzEnabled
@@ -124,8 +127,12 @@ class UploadServer(threading.Thread):
         self._session.verify = False
         r = self._session.get(urlString)
         if r.status_code == 200:
-            print(r)
-            print(r.text)
+            if self.showdebug:
+                print(r)
+                print('rtext '+r.text)
+            if "STATUS=FAIL" in r.text:
+                print("Failed to upload to QRZ.com returned status is: ")
+                print(r.text)
             return True
         
         print('Response: '+r)
@@ -138,8 +145,14 @@ class UploadServer(threading.Thread):
         r = self._session.get(urlString, verify=False)
        # r = requests.get(urlString, verify=False)
         if r.status_code == 200:
-            print(r)
-            print(r.text)
+            if self.showdebug:
+                print(r)
+                print(r.text)
+            
+            if "Result: 1 out of 1" not in r.text:
+                print("Failed to upload to eQSL.cc returned status is: ")
+                print(r.text)
+                
             return True
         
         print('Response: '+r)
@@ -151,7 +164,8 @@ class UploadServer(threading.Thread):
         #url=url+'&EQSL_USER={1}&EQSL_PSWD={2}'
         url=url.format(adifEntry,self.eqslUser,self.eqslPassword)
         
-        print('eqsl '+url)
+        if self.showdebug:
+            print('eqsl '+url)
         self.sendToEQSL(url)
         
     def uploadToQRZ(self, logEntry):
@@ -161,8 +175,10 @@ class UploadServer(threading.Thread):
         url = url+'ACTION=INSERT&ADIF={1}'
         url = url.format(self.qrzAPIKey, logEntry)
         
-        print(url)
+        if self.showdebug:
+            print(url)
         self.sendToQRZ(url)
+        
     def setListen(self, listen):
         self.listening=listen
         #if self.listening==False:

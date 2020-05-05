@@ -1,6 +1,10 @@
 import configparser
 import os
 
+#Realtime ADIF uploaded for JS8Call
+#By Mark - M0IAX
+#http://m0iax.com/findme
+
 #creates the config file if it does not exist
 def createConfigFile(configFileName):
     #cretes the config file if it does not exist

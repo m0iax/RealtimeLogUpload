@@ -1,7 +1,8 @@
+#Realtime ADIF uploaded for JS8Call
+#By Mark - M0IAX
+#http://m0iax.com/findme
+
 import threading
-
-#from __future__ import print_function
-
 from socket import socket, AF_INET, SOCK_DGRAM
 
 import json
@@ -65,7 +66,7 @@ class Server(threading.Thread):
             self.uploadADIF = uploadadif 
                
         self.showoutput = False
-        self.showLogOutput = True
+        self.showLogOutput = False
         self.first = False
         self.messageText=None
         self.messageType=None
@@ -95,7 +96,8 @@ class Server(threading.Thread):
             if self.showLogOutput:
                 print('===========logging========= ')
                 print(value)
-                self.uploadADIF.processMessage(value)
+            self.uploadADIF.processMessage(value)
+            if self.showLogOutput:   
                 print('=========================== ')
             
         if self.showoutput:
@@ -110,7 +112,8 @@ class Server(threading.Thread):
         if typ == 'RIG.PTT':
             if value == 'on':
                 self.pttCount = self.pttCount+1
-                print("PTT COUNT=====",self.pttCount)
+                if self.showoutput:
+                    print("PTT COUNT=====",self.pttCount)
 
         elif typ == 'CLOSE':
             self.close()
