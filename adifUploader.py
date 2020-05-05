@@ -12,7 +12,7 @@ import udpServer
 import UploadADIF
 
 WIDTH=270
-HEIGHT=100
+HEIGHT=110
 appName="ADIF Uploader for JS8Call"
 
 class UI(Tk):
