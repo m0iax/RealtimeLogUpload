@@ -16,7 +16,6 @@ import errno
 from time import sleep
 import urllib3
 
-#import configAndSettings
 
 def createConfigFile(configFileName):
     #cretes the config file if it does not exist
@@ -67,9 +66,7 @@ class UploadServer(threading.Thread):
     pttCount=0
     
     def toggleEQSL(self):
-        #print('QSL ',self.eqslEnabled)
         self.eqslEnabled = not self.eqslEnabled
-        #print('QSL Now',self.eqslEnabled)
         return self.eqslEnabled
     def toggleQRZ(self):
         self.qrzEnabled = not self.qrzEnabled
@@ -91,7 +88,6 @@ class UploadServer(threading.Thread):
         
         #we can ignore the ssl warnings as the two domains we are uploading to are secure
         urllib3.disable_warnings()
-        #self.listen = (serverip, serverport)
         self.showdebug=False
         self.listening = True
        
@@ -107,12 +103,6 @@ class UploadServer(threading.Thread):
         self.messageType=None
         self.pttCount = 0
         
-        #print('listening on', ':'.join(map(str, self.listen)))
-
-        #self.sock = socket(AF_INET, SOCK_DGRAM)
-        #self.sock.bind(self.listen)
-        #self.sock.setblocking(False)
-    
     def processMessage(self,value):
         if self.qrzEnabled:
             self.uploadToQRZ(value)
@@ -141,9 +131,7 @@ class UploadServer(threading.Thread):
     def sendToEQSL(self, urlString):
           
         self._session = requests.Session()
-       # self._session.verify = False
         r = self._session.get(urlString, verify=False)
-       # r = requests.get(urlString, verify=False)
         if r.status_code == 200:
             if self.showdebug:
                 print(r)
@@ -161,7 +149,6 @@ class UploadServer(threading.Thread):
     def uploadToEQSL(self, adifEntry):
         print('Uploading to eQSL.cc')
         url='https://eQSL.cc/qslcard/importADIF.cfm?ADIFData={0}&EQSL_USER={1}&EQSL_PSWD={2}'
-        #url=url+'&EQSL_USER={1}&EQSL_PSWD={2}'
         url=url.format(adifEntry,self.eqslUser,self.eqslPassword)
         
         if self.showdebug:
@@ -181,53 +168,12 @@ class UploadServer(threading.Thread):
         
     def setListen(self, listen):
         self.listening=listen
-        #if self.listening==False:
-        #    if self.sock!=None:
-        #        self.sock.close()
-#    def run(self):
-#        try:
-#            try:
-#                while self.listening:
-#                    if self.sock!=None:
-#                        try:
-#                            content, addr = self.sock.recvfrom(65500)
-#                            #content, addr = self.sock.listen(5)
-#                        except Exception as e:
-#                            err = e.args[0]
-#                            if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-#                                sleep(1)
-#                                #print('No data available')
-#                                continue
-#                            else:
-#                                # a "real" error occurred
-#                                print (e)
-#                                sys.exit(1)
-#                    if content!=None and addr!=None:
-#                        print('Detected ADIF from JS8Call:', ':'.join(map(str, addr)))
-#                    
-#                        if self.qrzEnabled:
-#                            self.uploadToQRZ(content)
-#                        if self.eqslEnabled:
-#                            self.uploadToEQSL(content)
-#                        if not self.qrzEnabled and not self.eqslEnabled:
-#                            print ('No ADIF upload enabled. ADIF not uploaded.')
-                
-#            finally:
-#                self.sock.close()
-                #self.join()
-#        except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
-#            print ("\nKilling Thread...")
-#            self.listening = False
-#            self.join() # wait for the thread to finish what it's doing
-#            print ("Done.\nExiting.")
             
     def close(self):
         self.listening = False
 
-
 if __name__ == "__main__":
     
     server = UploadServer()
-#    server.start()
     
 
