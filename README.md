@@ -34,7 +34,7 @@ chmod +x adifUploader.py
 to run the app:
 ./adifUploader.py
 
-<b>Windows<b>
+<b>Windows</b>
  from the command prompt<br>
  
  cd RealTimeLogUpload<br>
@@ -65,7 +65,7 @@ eqsl = 0<br>
 qrz = 0<br>
  </p>
  
-Do not change the format of the file, but update the values APIKEY, USERNAME, PASSWORD with your details, for example 
+<b>Do not change the format of the file</b>, but update the values APIKEY, USERNAME, PASSWORD with your details, for example 
 
  <p>
  [QRZ.COM]<br>
@@ -83,6 +83,24 @@ qrz = 0<br>
 Note if you do not use one or the other then you do not need to change the default setting for it.
 In the services section you can specify which ones you want enabled at startup change the 0 to a 1 if you want is enabled by default when you run the app, leave them at 0 and you will just need to click the button after running.
 <br>
+
+Once you have updated the settings file, close the app and run it again to pick up the new settings values.
+Click on the buttons to enable or disable auto upload, the button will be red or green to indicate disabled or enbled.
+If you run from a command prompt or terminal window you will see upload error messages if the upload fails, if it is sucessful you will not see a message after upload.
+<br>
+
+<b>Future Enhancements Will include</b><br>
+<ul>
+ <li>Upload Status messages to be shown on the UI</li>
+ <li>QRZ Callsign Lookup</li>
+ <li>Offline Mode - collect ADIF for upload when back online</li>
+</ul>
+
+If you have any feature requests please get in touch http://m0iax.com/findme
+
+73
+Mark
+M0IAX
 
 
 
