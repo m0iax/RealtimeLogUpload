@@ -17,6 +17,7 @@ from time import sleep
 import urllib3
 
 
+
 def createConfigFile(configFileName):
     #cretes the config file if it does not exist
     if not os.path.isfile(configFileName):
@@ -26,7 +27,8 @@ def createConfigFile(configFileName):
         config['QRZ.COM'] = {'apikey': 'APIKEY'
                             }  
         config['EQSL.CC'] = {'username': 'USERNAME',
-                             'password': 'PASSWORD'
+                             'password': 'PASSWORD',
+                             'qthnickname': ''                            
                             }  
         config['SERVICES'] = {'eqsl': 0,
                              'qrz': 0
@@ -48,6 +50,7 @@ if os.path.isfile(configfilename):
     
     eqsluser= config.get('EQSL.CC', 'username')
     eqslpassword= config.get('EQSL.CC', 'password')
+    eqslQTHNickName = config.get('EQSL.CC', 'qthnickname')
     
     qrz=int(config.get('SERVICES','qrz'))
     qrzEnabled=False
@@ -97,6 +100,7 @@ class UploadServer(threading.Thread):
         self.qrzAPIKey = qrzAPIKey
         self.eqslUser = eqsluser
         self.eqslPassword = eqslpassword
+        self.eqslQTHNickName=eqslQTHNickName
         
         self.first = False
         self.messageText=None
@@ -113,9 +117,9 @@ class UploadServer(threading.Thread):
     
     def sendToQRZ(self, urlString):
       
-        self._session = requests.Session()
-        self._session.verify = False
-        r = self._session.get(urlString)
+        self.session = requests.Session()
+        self.session.verify = False
+        r = self.session.get(urlString)
         if r.status_code == 200:
             if self.showdebug:
                 print(r)
@@ -130,8 +134,8 @@ class UploadServer(threading.Thread):
 
     def sendToEQSL(self, urlString):
           
-        self._session = requests.Session()
-        r = self._session.get(urlString, verify=False)
+        self.session = requests.Session()
+        r = self.session.get(urlString, verify=False)
         if r.status_code == 200:
             if self.showdebug:
                 print(r)
@@ -148,7 +152,15 @@ class UploadServer(threading.Thread):
         
     def uploadToEQSL(self, adifEntry):
         print('Uploading to eQSL.cc')
+        EQSL_NICKNAME_PARAM="<APP_EQSL_QTH_NICKNAME:{0}>{1} <eor>"
+        TAG_END_OF_RECORD="<eor>"
+        
         url='https://eQSL.cc/qslcard/importADIF.cfm?ADIFData={0}&EQSL_USER={1}&EQSL_PSWD={2}'
+        if self.eqslQTHNickName!=None:
+            qthName=EQSL_NICKNAME_PARAM.format(len(self.eqslQTHNickName), self.eqslQTHNickName)
+            newadifEntry=adifEntry.replace(TAG_END_OF_RECORD, qthName)
+            adifEntry=newadifEntry
+        
         url=url.format(adifEntry,self.eqslUser,self.eqslPassword)
         
         if self.showdebug:
