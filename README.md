@@ -85,7 +85,7 @@ qrz = 0<br>
 Note if you do not use one or the other then you do not need to change the default setting for it.
 In the services section you can specify which ones you want enabled at startup change the 0 to a 1 if you want is enabled by default when you run the app, leave them at 0 and you will just need to click the button after running.
 <br>
-<strong>NOTE FOR USERS UPDATING TO VERSION SUPPORTING QTH NAME</strong>
+<strong>NOTE FOR USERS UPDATING TO VERSION SUPPORTING QTH NICKNAME</strong>
 <p>You will either need to delete the exsiting file and run the app again to re-create it, or manually add the qthnickname setting
  </p>
  <b>If you do not use the QTH Nickname in eQSL then just leave it blank</b>
