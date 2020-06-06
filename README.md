@@ -43,6 +43,9 @@ to run the app:
  
  cd RealTimeLogUpload<br>
  
+ (before running for the first time install the prerequisite modules)<br>
+ py -m pip install requests<br>
+ 
  py -m adifUploader.py<br>
  
  <br>
