@@ -22,7 +22,7 @@ Install:
 
 clone or download this repo if downlading a .zip file unzip into a directory on your computer.
 
-<b>Linux (including Raspberry Pi)</b>
+<b>Linux (including Raspberry Pi) and MacOS</b>
 
 run a command prompt, change directory to the installation directory.<br>
 
@@ -30,6 +30,10 @@ cd RealtimeLogUpload<br>
 
 Before you run it for the first time enter the command:
 chmod +x adifUploader.py
+<br>
+install the pre-requisite python modules using the commands:<br>
+
+pip3 install requests<br>
 
 to run the app:
 ./adifUploader.py
